@@ -72,9 +72,12 @@ Keep `ADMIN_TOKEN` private. Update the preview-pinned baileyrs dependency after 
 
 ## Checks
 
+`npm run smoke:workerd` bundles the installed baileyrs `/host` entry and runs this Worker under Wrangler's local workerd runtime with `nodejs_compat` disabled. It checks the admin-token guard and Durable Object status route. It does not start a WhatsApp connection, require an account, or deploy to Cloudflare.
+
 ```sh
 npm test
 npm run lint
 npm run typecheck
 npm run build
+npm run smoke:workerd
 ```
