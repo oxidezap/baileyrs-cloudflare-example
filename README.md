@@ -68,7 +68,7 @@ curl https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/status \
 
 Use the same pairing and reconnection steps above with your deployed URL.
 
-Keep `ADMIN_TOKEN` private. Update the preview-pinned baileyrs dependency after a tested release or preview change. This example uses the exact baileyrs build `ad2e498` because it is not yet published as an npm release.
+Keep `ADMIN_TOKEN` private. This example uses baileyrs from npm. See [package.json](package.json) for the version range and [package-lock.json](package-lock.json) for the resolved release. Test dependency updates before deployment.
 
 ## Checks
 
