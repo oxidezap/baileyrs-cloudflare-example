@@ -38,6 +38,7 @@ export class Bot extends DurableObject<Env> {
     const socket = makeWASocket({ auth, version: [2, 3000, 1043857760], logger: undefined })
     this.socket = socket
     socket.ev.on('connection.update', async ({ connection, qr, lastDisconnect }) => {
+      console.log('connection state', connection ?? (qr ? 'qr' : 'updated'))
       if (qr) this.status = { state: 'waiting_for_qr', qr }
       else if (connection === 'open') this.status = { state: 'connected' }
       else if (connection === 'connecting') this.status = { state: 'connecting' }
@@ -59,7 +60,7 @@ export class Bot extends DurableObject<Env> {
       }
     })
     socket.ev.on('messages.upsert', event => {
-      void handleMessages(socket, event).catch(error => console.error('Message reply failed', error))
+      void handleMessages(socket, event).catch(error => console.error('Message handler failed', JSON.stringify({ errorClass: error instanceof Error ? error.name : typeof error })))
     })
     this.status = { state: 'connecting' }
   }

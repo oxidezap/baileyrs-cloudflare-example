@@ -13,12 +13,12 @@ export const replyText = (message: HostBaileysEventMap['messages.upsert']['messa
   const jid = message.key.remoteJid
   if (message.key.fromMe || !jid || !/^[^@]+@(s\.whatsapp\.net|c\.us|lid|hosted|hosted\.lid)$/.test(jid)) return
   let content = message.message
-  if (!content || 'protocolMessage' in content || 'senderKeyDistributionMessage' in content) return
+  if (!content || content.protocolMessage != null || content.senderKeyDistributionMessage != null) return
   const ephemeral = content.ephemeralMessage
   if (isRecord(ephemeral)) {
     content = isRecord(ephemeral.message) ? ephemeral.message : null
   }
-  if (!content || typeof content !== 'object' || 'protocolMessage' in content || 'senderKeyDistributionMessage' in content) return
+  if (!content || typeof content !== 'object' || content.protocolMessage != null || content.senderKeyDistributionMessage != null) return
   const extended = content.extendedTextMessage
   const text = content.conversation ?? (typeof extended === 'object' && extended !== null && 'text' in extended
     ? extended.text
@@ -31,11 +31,20 @@ export const handleMessages = async (
   socket: HostWASocket,
   event: HostBaileysEventMap['messages.upsert']
 ): Promise<void> => {
+  console.log('messages.upsert', JSON.stringify({ type: event.type, count: event.messages.length }))
   if (event.type !== 'notify') return
   for (const message of event.messages) {
     const jid = message.key.remoteJid
     const text = replyText(message)
+    console.log('message eligibility', JSON.stringify({ eligible: Boolean(jid && text) }))
     if (!jid || !text) continue
-    await socket.sendMessage(jid, { text })
+    console.log('reply attempt')
+    try {
+      await socket.sendMessage(jid, { text })
+      console.log('reply outcome', JSON.stringify({ outcome: 'sent' }))
+    } catch (error) {
+      console.error('reply outcome', JSON.stringify({ outcome: 'failed', errorClass: error instanceof Error ? error.name : typeof error }))
+      throw error
+    }
   }
 }
