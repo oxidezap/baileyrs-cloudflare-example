@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { HostBaileysEventMap } from '@oxidezap/baileyrs/host'
 import { replyText } from '../src/bot.ts'
 import { createStore } from '../src/persistence.ts'
+import { proto } from '@oxidezap/baileyrs/lib/WAProto/runtime.js'
 
 const message = (text: string, fromMe = false, remoteJid = '15551234567@s.whatsapp.net') => ({
   key: { remoteJid, fromMe },
@@ -15,6 +16,15 @@ describe('bot input handling', () => {
     expect(replyText(message('ping', false, '123@g.us'))).toBeUndefined()
     expect(replyText(message('ping', false, 'user@hosted.lid'))).toBe('pong')
     expect(replyText(message('pong'))).toBeUndefined()
+  })
+
+  it('accepts real protobuf messages with nullable inherited fields', () => {
+    const protobuf = proto.Message.fromObject({ conversation: 'ping' })
+    expect('protocolMessage' in protobuf).toBe(true)
+    expect(protobuf.protocolMessage).toBeNull()
+    expect(replyText({ key: { remoteJid: 'opaque@s.whatsapp.net' }, message: protobuf } as unknown as HostBaileysEventMap['messages.upsert']['messages'][number])).toBe('pong')
+    expect(replyText({ key: { remoteJid: 'opaque@s.whatsapp.net' }, message: proto.Message.fromObject({ protocolMessage: {} }) } as unknown as HostBaileysEventMap['messages.upsert']['messages'][number])).toBeUndefined()
+    expect(replyText({ key: { remoteJid: 'opaque@s.whatsapp.net' }, message: proto.Message.fromObject({ senderKeyDistributionMessage: {} }) } as unknown as HostBaileysEventMap['messages.upsert']['messages'][number])).toBeUndefined()
   })
 
   it('matches text inside disappearing messages', () => {
