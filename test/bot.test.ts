@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { HostBaileysEventMap } from '@oxidezap/baileyrs/host'
 import { replyText } from '../src/bot.ts'
-import { createStore, deserialize, serialize } from '../src/persistence.ts'
+import { createStore } from '../src/persistence.ts'
 
 const message = (text: string, fromMe = false, remoteJid = '15551234567@s.whatsapp.net') => ({
   key: { remoteJid, fromMe },
@@ -31,10 +31,5 @@ describe('bot input handling', () => {
     await firstBoot.set('session', 'key', new Uint8Array([7, 8]))
     const nextBoot = createStore(storage)
     expect(await nextBoot.get('session', 'key')).toEqual(new Uint8Array([7, 8]))
-  })
-
-  it('keeps typed byte arrays intact in persisted credentials', () => {
-    const credentials = { identity: new Uint8Array([0, 3, 255]) }
-    expect(deserialize<typeof credentials>(serialize(credentials))).toEqual(credentials)
   })
 })

@@ -25,13 +25,21 @@ curl -X POST http://localhost:8787/start \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-Poll `/status` until it returns a QR, then scan it with WhatsApp's linked-device scanner. The QR is short-lived and must be kept private. Check connection state with:
+Poll `/status` until the response contains a `qr` string:
 
 ```sh
 curl http://localhost:8787/status -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-The response contains the QR only while pairing. Send `ping` from another WhatsApp account to receive `pong`. Group messages and messages sent by the bot are ignored.
+Render that string as a QR in your local terminal, then scan it with WhatsApp's linked-device scanner:
+
+```sh
+curl -fsS http://localhost:8787/status -H "Authorization: Bearer YOUR_TOKEN" \
+  | node --input-type=module -e 'let body = ""; for await (const chunk of process.stdin) body += chunk; const { qr } = JSON.parse(body); if (!qr) throw new Error("No QR available. Check /status and retry."); process.stdout.write(qr)' \
+  | npx --yes --package=qrcode@1.5.4 qrcode --small
+```
+
+The renderer runs locally. The QR is short-lived and must be kept private. Repeat the command if it expires. The response contains the QR only while pairing. Send `ping` from another WhatsApp account to receive `pong`. Group messages and messages sent by the bot are ignored.
 
 The Durable Object stores credentials and Signal state. Treat its storage as a secret. Do not share status responses, QR codes, or backups.
 
@@ -53,6 +61,8 @@ curl -X POST https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/start \
 curl https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/status \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
+
+Use the same QR rendering command with your deployed `/status` URL to pair. If the object restarts, `/status` reports `stopped`; call `/start` to reconnect using its stored credentials.
 
 Keep `ADMIN_TOKEN` private. Update the preview-pinned baileyrs dependency after a tested release or preview change. This example uses the exact baileyrs build `ad2e498` because it is not yet published as an npm release.
 
