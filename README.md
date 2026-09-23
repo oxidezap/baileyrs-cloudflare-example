@@ -68,6 +68,8 @@ curl https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/status \
 
 Use the same pairing and reconnection steps above with your deployed URL.
 
+For delivery diagnostics, see the logging and tracing configuration in [wrangler.jsonc](wrangler.jsonc). The bot logs connection state, incoming event type and message count, message eligibility, reply attempts, and send outcomes. A `connected` status alone does not confirm delivery. A `sent` outcome means `sendMessage` resolved, not that the recipient received the reply. Reply failures log the error class without the error message or stack.
+
 Keep `ADMIN_TOKEN` private. This example uses baileyrs from npm. See [package.json](package.json) for the version range and [package-lock.json](package-lock.json) for the resolved release. Test dependency updates before deployment.
 
 ## Checks
