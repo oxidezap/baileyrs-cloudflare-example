@@ -34,7 +34,8 @@ export class Bot extends DurableObject<Env> {
     initSync({ module: wasm })
     const store = createStore(this.ctx.storage)
     const auth = await createAuthenticationState(store)
-    const socket = makeWASocket({ auth, logger: undefined })
+    // The pinned preview's default protocol version is rejected by WhatsApp.
+    const socket = makeWASocket({ auth, version: [2, 3000, 1043857760], logger: undefined })
     this.socket = socket
     socket.ev.on('connection.update', ({ connection, qr, lastDisconnect }) => {
       if (qr) this.status = { state: 'waiting_for_qr', qr }
