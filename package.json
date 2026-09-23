@@ -1,0 +1,23 @@
+{
+  "name": "baileyrs-cloudflare-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/copy-wasm.mjs && wrangler dev",
+    "deploy": "node scripts/copy-wasm.mjs && wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "oxlint",
+    "build": "node scripts/copy-wasm.mjs && wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "@oxidezap/baileyrs": "https://pkg.pr.new/@oxidezap/baileyrs@ad2e498"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260922.1",
+    "oxlint": "^1.83.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.136.3"
+  }
+}
