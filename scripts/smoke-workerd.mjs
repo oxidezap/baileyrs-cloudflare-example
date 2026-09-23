@@ -1,10 +1,11 @@
 import { spawn } from 'node:child_process'
-import { copyFile, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import net from 'node:net'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
+await mkdir(resolve(root, '.wrangler'), { recursive: true })
 const scratch = await mkdtemp(resolve(root, '.wrangler/workerd-smoke-'))
 const config = resolve(scratch, 'wrangler.jsonc')
 const token = 'workerd-smoke-token'
