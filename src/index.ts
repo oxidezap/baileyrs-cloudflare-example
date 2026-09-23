@@ -77,5 +77,3 @@ export default {
     return env.BOT.get(id).fetch(`https://bot${url.pathname}`, { method: request.method })
   }
 } satisfies ExportedHandler<Env>
-
-

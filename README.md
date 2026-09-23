@@ -43,6 +43,8 @@ The renderer runs locally. The QR is short-lived and must be kept private. Repea
 
 If `/status` reports `closed`, call `/start` again to reconnect. After an object restart, it reports `stopped`; call `/start` to reconnect using its stored credentials.
 
+If `/status` reports `logged_out`, the bot has cleared its stored credentials. Call `/start` and pair again.
+
 The Durable Object stores credentials and Signal state. Treat its storage as a secret. Do not share status responses, QR codes, or backups.
 
 ## Deploy
