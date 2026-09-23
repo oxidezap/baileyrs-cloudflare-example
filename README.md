@@ -41,6 +41,8 @@ curl -fsS http://localhost:8787/status -H "Authorization: Bearer YOUR_TOKEN" \
 
 The renderer runs locally. The QR is short-lived and must be kept private. Repeat the command if it expires. The response contains the QR only while pairing. Send `ping` from another WhatsApp account to receive `pong`. Group messages and messages sent by the bot are ignored.
 
+If `/status` reports `closed`, call `/start` again to reconnect. After an object restart, it reports `stopped`; call `/start` to reconnect using its stored credentials.
+
 The Durable Object stores credentials and Signal state. Treat its storage as a secret. Do not share status responses, QR codes, or backups.
 
 ## Deploy
@@ -62,7 +64,7 @@ curl https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/status \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-Use the same QR rendering command with your deployed `/status` URL to pair. If the object restarts, `/status` reports `stopped`; call `/start` to reconnect using its stored credentials.
+Use the same pairing and reconnection steps above with your deployed URL.
 
 Keep `ADMIN_TOKEN` private. Update the preview-pinned baileyrs dependency after a tested release or preview change. This example uses the exact baileyrs build `ad2e498` because it is not yet published as an npm release.
 
