@@ -45,6 +45,28 @@ it('keeps connection status with the socket across object restarts', async () =>
   expect(await (await restarted.fetch(new Request('https://bot/status'))).json()).toEqual({ state: 'stopped' })
 })
 
+it('clears revoked credentials before allowing a new pairing attempt', async () => {
+  const values = new Map<string, unknown>([['device:device', new Uint8Array([1])]])
+  const storage = {
+    get: async (key: string) => values.get(key),
+    deleteAll: vi.fn(async () => { values.clear() })
+  }
+  const bot = new Bot({ storage } as unknown as DurableObjectState, {
+    ADMIN_TOKEN: 'test', BOT: {} as DurableObjectNamespace<Bot>
+  })
+  await bot.fetch(new Request('https://bot/start', { method: 'POST' }))
+  const update = host.on.mock.calls.find(([event]) => event === 'connection.update')?.[1] as
+    (event: HostBaileysEventMap['connection.update']) => Promise<void>
+  await update({ connection: 'close', lastDisconnect: {
+    date: new Date(), error: Object.assign(new Error('logged out'), { output: { statusCode: 401 } })
+  } })
+  expect(storage.deleteAll).toHaveBeenCalledOnce()
+  expect(values.size).toBe(0)
+  expect(await (await bot.fetch(new Request('https://bot/status'))).json()).toEqual({ state: 'logged_out' })
+  await bot.fetch(new Request('https://bot/start', { method: 'POST' }))
+  expect(host.authenticate).toHaveBeenCalledTimes(2)
+})
+
 it('passes native credentials to the socket without a stale snapshot', async () => {
   const storage = {
     get: async () => JSON.stringify({ registered: false }),

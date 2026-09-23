@@ -13,7 +13,15 @@ describe('bot input handling', () => {
     expect(replyText(message(' Ping '))).toBe('pong')
     expect(replyText(message('ping', true))).toBeUndefined()
     expect(replyText(message('ping', false, '123@g.us'))).toBeUndefined()
+    expect(replyText(message('ping', false, 'user@hosted.lid'))).toBe('pong')
     expect(replyText(message('pong'))).toBeUndefined()
+  })
+
+  it('matches text inside disappearing messages', () => {
+    const ephemeral = { key: { remoteJid: '123@s.whatsapp.net' }, message: {
+      ephemeralMessage: { message: { extendedTextMessage: { text: 'ping' } } }
+    } } as HostBaileysEventMap['messages.upsert']['messages'][number]
+    expect(replyText(ephemeral)).toBe('pong')
   })
 
   it('reads auth keys after a Durable Object restart', async () => {

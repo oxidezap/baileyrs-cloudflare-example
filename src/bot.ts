@@ -6,10 +6,18 @@ export type BotStatus = {
   error?: string
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
 export const replyText = (message: HostBaileysEventMap['messages.upsert']['messages'][number]): string | undefined => {
   const jid = message.key.remoteJid
-  if (message.key.fromMe || !jid || !/^[^@]+@(s\.whatsapp\.net|c\.us|lid|hosted)$/.test(jid)) return
-  const content = message.message
+  if (message.key.fromMe || !jid || !/^[^@]+@(s\.whatsapp\.net|c\.us|lid|hosted|hosted\.lid)$/.test(jid)) return
+  let content = message.message
+  if (!content || 'protocolMessage' in content || 'senderKeyDistributionMessage' in content) return
+  const ephemeral = content.ephemeralMessage
+  if (isRecord(ephemeral)) {
+    content = isRecord(ephemeral.message) ? ephemeral.message : null
+  }
   if (!content || typeof content !== 'object' || 'protocolMessage' in content || 'senderKeyDistributionMessage' in content) return
   const extended = content.extendedTextMessage
   const text = content.conversation ?? (typeof extended === 'object' && extended !== null && 'text' in extended

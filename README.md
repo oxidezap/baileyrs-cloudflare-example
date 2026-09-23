@@ -5,7 +5,7 @@ A small WhatsApp bot built with [baileyrs](https://github.com/oxidezap/baileyrs)
 ## Requirements
 
 - A Cloudflare account on the Workers Free plan. SQLite-backed Durable Objects and their free allocation are required. Check the current [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) before deployment.
-- Node.js 22 or newer and npm.
+- Node.js 22.3 or newer and npm.
 - A WhatsApp account for pairing. Use this example only with an account you control.
 
 The bot makes an outbound WebSocket connection to WhatsApp. Cloudflare and WhatsApp can change their runtime, account, and usage limits. This example does not promise uninterrupted connections. No Cloudflare deployment is needed to try it locally.

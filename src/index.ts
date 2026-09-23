@@ -37,16 +37,23 @@ export class Bot extends DurableObject<Env> {
     // The pinned preview's default protocol version is rejected by WhatsApp.
     const socket = makeWASocket({ auth, version: [2, 3000, 1043857760], logger: undefined })
     this.socket = socket
-    socket.ev.on('connection.update', ({ connection, qr, lastDisconnect }) => {
+    socket.ev.on('connection.update', async ({ connection, qr, lastDisconnect }) => {
       if (qr) this.status = { state: 'waiting_for_qr', qr }
       else if (connection === 'open') this.status = { state: 'connected' }
       else if (connection === 'connecting') this.status = { state: 'connecting' }
       else if (connection === 'close') {
         const statusCode = (lastDisconnect?.error as (Error & { output?: { statusCode?: number } }) | undefined)?.output?.statusCode
-        const loggedOut = statusCode === 401
-        this.status = {
-          state: loggedOut ? 'logged_out' : 'closed',
-          error: lastDisconnect?.error?.message
+        if (statusCode === 401) {
+          this.status = { state: 'closed' }
+          try {
+            await this.ctx.storage.deleteAll()
+            this.status = { state: 'logged_out' }
+          } catch (error) {
+            console.error('Could not clear logged-out credentials', error)
+            this.status = { state: 'closed', error: 'Could not clear logged-out credentials' }
+          }
+        } else {
+          this.status = { state: 'closed', error: lastDisconnect?.error?.message }
         }
         this.socket = undefined
       }
