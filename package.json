@@ -12,7 +12,7 @@
     "smoke:workerd": "node scripts/smoke-workerd.mjs"
   },
   "dependencies": {
-    "@oxidezap/baileyrs": "https://pkg.pr.new/@oxidezap/baileyrs@ad2e498"
+    "@oxidezap/baileyrs": "^0.3.8"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260922.1",
