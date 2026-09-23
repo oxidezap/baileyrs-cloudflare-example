@@ -41,9 +41,9 @@ curl -fsS http://localhost:8787/status -H "Authorization: Bearer YOUR_TOKEN" \
 
 The renderer runs locally. The QR is short-lived and must be kept private. Repeat the command if it expires. The response contains the QR only while pairing. Send `ping` from another WhatsApp account to receive `pong`. Group messages and messages sent by the bot are ignored.
 
-After an object restart, the first request automatically attempts to reconnect with registered credentials already in Durable Object storage. A fresh, unpaired object remains `stopped` until you call `/start` to begin QR pairing. If a connected socket closes, later `/status` requests retry reconnection using stored credentials no more often than once every 30 seconds; `/start` remains available, with the same cooldown after non-logout disconnects.
+After an object restart, the first authenticated request automatically attempts to reconnect with registered credentials already in Durable Object storage. A fresh, unpaired object remains `stopped` until you call `/start` to begin QR pairing. After a non-logout disconnect or a failed connection attempt, `/status` and `/start` wait for a 30-second cooldown before retrying. The cooldown is held in memory and resets on an object restart. Concurrent requests share an in-progress connection attempt. Automatic recovery requires registered credentials; use `/start` if pairing is needed.
 
-Recovery is request-driven: no request means no new reconnect attempt. This does not guarantee an unattended, uninterrupted WhatsApp connection. If `/status` reports `logged_out`, the bot has cleared its stored credentials. Call `/start` and pair again.
+Recovery requires a request to trigger each reconnect attempt. This does not guarantee an unattended, uninterrupted WhatsApp connection. If `/status` reports `logged_out`, WhatsApp has revoked the session and the bot clears its stored credentials. Call `/start` and pair again. A failure to clear credentials changes the status to `closed` with an error.
 
 The Durable Object stores credentials and Signal state. Treat its storage as a secret. Do not share status responses, QR codes, or backups.
 
